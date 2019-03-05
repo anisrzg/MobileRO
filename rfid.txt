@@ -1,0 +1,3 @@
+tag1 -> point de depart
+tag2 -> Bifurcation
+tag3 -> delivry
