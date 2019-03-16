@@ -195,9 +195,7 @@ def calibration_mag():
 
 
 def signe(number):
-     .................. # retour avec la valeur +1 ou -1 si le nombre reel "number" est pos ou neg
-
-
+     return() # retour avec la valeur +1 ou -1 si le nombre reel "number" est pos ou neg
 
 ####################################################################################################################
 
@@ -223,38 +221,39 @@ def start_mode_auto(choix):
 # setup detecteur de ligne
     line_finder_right = 8
     line_finder_left = 7
-    ................... # configuration en E/S du GPIO correspondant au line_finder_right
-    ................... # configuration en E/S du GPIO correspondant au line_finder_left
-    ................... # ecriture pour montrer que le 1er line finder  est READY
-    ................... # petite attente de 0,2s
-    ................... # ecriture pour montrer que le 2eme line finder est READY
-    ................... # petite attente de 0,2s
+    GPIO.setup(8,GPIO.INPUT) # configuration en E/S du GPIO correspondant au line_finder_right
+    GPIO.setup(7,GPIO.INPUT)  # configuration en E/S du GPIO correspondant au line_finder_left
+    "line finder right is READY" # ecriture pour montrer que le 1er line finder  est READY
+    time.sleep(0.2) # petite attente de 0,2s
+    "line finder left is READY" # ecriture pour montrer que le 2eme line finder est READY
+    time.sleep(0.2) # petite attente de 0,2s
+
 
 
 # setup servo head
     GPIO.SETUP(18, GPIO.OUT) # configuration en E/S du GPIO 18 correspondant au servomoteur de tete
     servo_head = servo.PWM(18, 50) # configuration du PWM sur le GPIO 18 avec une periode de 20ms
     servo_head.start(7.5) # initialisation du servo sur l'angle 0 (position milieu sachant que angle de -135 a +135)
-    print('Servo HEAD is ready') # ecriture pour montrer que le servo head est READY
+    print('Servo HEAD ---> READY') # ecriture pour montrer que le servo head est READY
     time.sleep(0.2) # petite attente de 0,2s
 
 
 # setup servo delivery
     GPIO.SETUP(25, GPIO.OUT) # configuration en E/S du GPIO 25 correspondant au servomoteur de livraison de materiel
     servo_delivery = servo.PWM(25, 50) # configuration du PWM sur le GPIO 25 avec une periode de 20ms
-    servo_delivry.start(10) # initialisation du servomo sur l'angle 0 (position trappe fermee sachant que angle de -120 a 0)
-    print('Servo Delivry is ready') # ecriture pour montrer que le servo delivery est READY
+    servo_delivry.start(5) # initialisation du servomo sur l'angle 0 (position trappe fermee sachant que angle de -120 a 0)
+    print('Servo Delivry ---> READY') # ecriture pour montrer que le servo delivery est READY
     time.sleep(0.2) # petite attente de 0,2s
 
 
 # setup us_detector
     TRIG = 16
     ECHO = 12
-    ................... # configuration en E/S du GPIO correspondant au signal TRIG
-    ................... # configuration en E/S du GPIO correspondant au signal ECHO
-    ................... # initialisation du signal TRIG au niveau bas
-    ................... # ecriture pour montrer que le servo delivery est READY
-    ................... # petite attente de 0,2s
+    GPIO.setup(16,GPIO.OUTPUT) # configuration en E/S du GPIO correspondant au signal TRIG
+    GPIO.setup(12,GPIO.INPUT) # configuration en E/S du GPIO correspondant au signal ECHO
+    GPIO.output(12, GPIO.LOW) # initialisation du signal TRIG au niveau bas
+    "US detector is READY" # ecriture pour montrer que le servo delivery est READY
+    time.sleep(0.2) # petite attente de 0,2s
 
 
 # setup angular sensor (magnetometre)
@@ -306,7 +305,7 @@ def start_mode_auto(choix):
     rfid6="020036D944A9"
     rfid7="0300C8D6E9F4"
     rfid8="0300C8D69F82"
-    list_rfied=[rfid1, rfid2, rfid3, rfid4, rfid5, rfid6, rfid7, rfid8] # codes des 8 tags mis dans la liste "list_rfid"
+    list_rfid=[rfid1, rfid2, rfid3, rfid4, rfid5, rfid6, rfid7, rfid8] # codes des 8 tags mis dans la liste "list_rfid"
 
     print('Initialisation parameters are READY') # ecriture pour montrer que l'initialisation des parametres est READY
 
@@ -333,10 +332,10 @@ def start_mode_auto(choix):
 # Test de la presence d'obstacle
 
 
-        .................. # si obstacle detecte ( en etant alle a la fonction "obstacle_detected(TRIG,ECHO,seuil)" )
-            .................. # arret
-            .................. # pendant 5s
-            .................. # la variable "alarm" reste a 0
+        if obstacle_detected(TRIG,ECHO,seuil) == 1:  # si obstacle detecte ( en etant alle a la fonction "obstacle_detected(TRIG,ECHO,seuil)" )
+            stop_motion() # arret
+            time.sleep(5) # pendant 5s
+            alarm = 0 # la variable "alarm" reste a 0
 
 
 
@@ -443,10 +442,10 @@ def start_mode_auto(choix):
                         lock1 == 1 # realisation du verrouillage pour ne plus prendre en compte le tag deja detecte
                         alarm == 0 # la variable "alarm" reste a 0
                         stop_motion() # arret du robot
-                        head_angle = 90 # la variable "head_angle" prend la valeur ......
+                        head_angle = 0 # la variable "head_angle" prend la valeur ......
                         turn_head(servo_head, head_angle) # saut a fonction turn_head(servo_head,head_angle) pour tourner tete
                         time.sleep(2) # attente de 2s
-                        linear_motion() # redemarrage avec la fonction "linear_motion"
+                        linear_motion(1, 45, head_angle) # redemarrage avec la fonction "linear_motion"
                         time.sleep(1) # pendant 1s
                         stop_motion() # arret du robot
 
@@ -462,12 +461,12 @@ def start_mode_auto(choix):
                         alarm == 0
                         stop_motion()
                         if choix == 1:
-                            head_angle = 90 # la variable head_angle prend la valeur 90° pour aller a droite
+                            head_angle = -90 # la variable head_angle prend la valeur 90° pour aller a droite
                         else:
-                            head_angle = -60 # la variable head_angle prend la valeur 60° pour aller à gauche
+                            head_angle = 120 # la variable head_angle prend la valeur 60° pour aller à gauche
                         turn_head(servo_head, head_angle)
                         time.sleep(2) # Attente de 2s
-                        linear_motion() # redemarre avec linear_motion()
+                        linear_motion(1, 45, head_angle) # redemarre avec linear_motion()
                         time.sleep(1) # Attente de 1s
 
 
@@ -482,7 +481,7 @@ def start_mode_auto(choix):
                         stop_motion() # Arret du robot devant le depot
                         delivery(servo_delivery)
                         time.sleep(1)
-                        linear_motion() # avance v = 45 et head_angle =
+                        linear_motion(1, 45, head_angle)
                         time.sleep(1) # Attente 1s
 
 
@@ -494,10 +493,10 @@ def start_mode_auto(choix):
                         lock4 == 1
                         alarm == 0
                         stop_motion()
-                        head_angle = 90
+                        head_angle = 180
                         turn_head(servo_head, head_angle)
                         time.sleep(2) # Attente de 2s
-                        linear_motion() # le robot redemarre avec head_angle pour linear_motion
+                        linear_motion(1, 45, head_angle) # le robot redemarre avec head_angle pour linear_motion
                         time.sleep(1) # Attente de 1s pour linear_motion
 
 
@@ -509,10 +508,10 @@ def start_mode_auto(choix):
                         lock5 == 1
                         alarm == 0
                         stop_motion()
-                        head_angle = -90
+                        head_angle = 90
                         turn_head(servo_head, head_angle)
                         time.sleep(2) # Attente de 2s
-                        linear_motion() # A configurer avec vitesse, head_angle ...
+                        linear_motion(1, 45, head_angle) # A configurer avec vitesse, head_angle ...
                         time.sleep(1) # Attente de 1s pour linear_motion
 
 
@@ -528,7 +527,7 @@ def start_mode_auto(choix):
                         stop_motion()
                         delivery(servo_delivery)
                         time.sleep(1)
-                        linear_motion() # A configurer avec vitesse, head_angle ...
+                        linear_motion(1, 45, head_angle) # A configurer avec vitesse, head_angle ...
 
 
 # rfid7 permet de faire tourner la tete avec angle "head_angle" (droite oblique vers la droite du triangle equilateral)
@@ -539,10 +538,10 @@ def start_mode_auto(choix):
                         lock7 = 1
                         alarm == 0
                         stop_motion()
-                        head_angle = 60
+                        head_angle = -120
                         turn_head(servo_head, head_angle)
                         time.sleep(1)
-                        linear_motion() # A configurer avec vitesse, head_angle ...
+                        linear_motion(1, 45, head_angle) # A configurer avec vitesse, head_angle ...
                         time.sleep(1) # Attente de 1s pour faire avancer le robot pdt 1s
 
 
@@ -558,7 +557,7 @@ def start_mode_auto(choix):
                         head_angle == 0
                         turn_head(servo_head, head_angle)
                         time.sleep(1)
-                        linear_motion()
+                        linear_motion(1, 45, head_angle)
                         time.sleep(1)
                         stop_motion()
 
