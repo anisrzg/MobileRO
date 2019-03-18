@@ -195,7 +195,7 @@ def calibration_mag():
 
 
 def signe(number):
-     return() # retour avec la valeur +1 ou -1 si le nombre reel "number" est pos ou neg
+     return(float(number)/float(abs(number))) # retour avec la valeur +1 ou -1 si le nombre reel "number" est pos ou neg
 
 ####################################################################################################################
 
@@ -221,11 +221,11 @@ def start_mode_auto(choix):
 # setup detecteur de ligne
     line_finder_right = 8
     line_finder_left = 7
-    GPIO.setup(8,GPIO.INPUT) # configuration en E/S du GPIO correspondant au line_finder_right
-    GPIO.setup(7,GPIO.INPUT)  # configuration en E/S du GPIO correspondant au line_finder_left
-    "line finder right is READY" # ecriture pour montrer que le 1er line finder  est READY
+    GPIO.setup(line_finder_right,GPIO.IN) # configuration en E/S du GPIO correspondant au line_finder_right
+    GPIO.setup(line_finder_left,GPIO.IN)  # configuration en E/S du GPIO correspondant au line_finder_left
+    print("line finder right > READY") # ecriture pour montrer que le 1er line finder  est READY
     time.sleep(0.2) # petite attente de 0,2s
-    "line finder left is READY" # ecriture pour montrer que le 2eme line finder est READY
+    print("line finder left > READY") # ecriture pour montrer que le 2eme line finder est READY
     time.sleep(0.2) # petite attente de 0,2s
 
 
@@ -249,10 +249,10 @@ def start_mode_auto(choix):
 # setup us_detector
     TRIG = 16
     ECHO = 12
-    GPIO.setup(16,GPIO.OUTPUT) # configuration en E/S du GPIO correspondant au signal TRIG
-    GPIO.setup(12,GPIO.INPUT) # configuration en E/S du GPIO correspondant au signal ECHO
-    GPIO.output(12, GPIO.LOW) # initialisation du signal TRIG au niveau bas
-    "US detector is READY" # ecriture pour montrer que le servo delivery est READY
+    GPIO.setup(TRIG,GPIO.OUT) # configuration en E/S du GPIO correspondant au signal TRIG
+    GPIO.setup(ECHO,GPIO.IN) # configuration en E/S du GPIO correspondant au signal ECHO
+    GPIO.output(TRIG, GPIO.LOW) # initialisation du signal TRIG au niveau bas
+    print("US detector > READY") # ecriture pour montrer que le capteur US est READY
     time.sleep(0.2) # petite attente de 0,2s
 
 
@@ -344,25 +344,25 @@ def start_mode_auto(choix):
 # Suivi de la ligne noire
 
 
-        .................. # sinon (cad si pas d'obstacle detecte)
+        else : # sinon (cad si pas d'obstacle detecte)
 
 
 # si le capteur de gauche et si le capteur de droite sont sur le blanc
 # la variable "motor_angle" s'ecarte de la variable "head_angle" pour scruter la zone perpendiculairement
 # puis variable "motor_angle" s'ecarte de variable "head_angle" pour scruter zone perpendiculairement dans autre sens
 
-            ..................
-                .................. # test de variable "alarm" pour savoir si juste avant la ligne noire n'etait pas perdue
-                    .................. # "debut_alarm" prend la valeur de l'instant ou ligne vient etre perdue
-                    .................. # donner la nouvelle valeur a "alarm" indiquant la perte de ligne la 1ere fois
+            if line_detected(line_finder_left) == 0 and line_detected(line_finder_right) == 0 :
+                if alarm == 0 : # test de variable "alarm" pour savoir si juste avant la ligne noire n'etait pas perdue
+                    debut_alarm = time.time() # "debut_alarm" prend la valeur de l'instant ou ligne vient etre perdue
+                    alarm = 1 # donner la nouvelle valeur a "alarm" indiquant la perte de ligne la 1ere fois
 
-                .................. # si le temps ecoule depuis la perte de la ligne est < 1,5 s
+                if debut_alarm < 1,5 : # si le temps ecoule depuis la perte de la ligne est < 1,5 s
                     .................. # premiere scrutation
-                .................. # sinon
-                    .................. # si le temps ecoule depuis la perte de la ligne est < .......
+                else : # sinon
+                    if debut_alarm < 4,5 :# si le temps ecoule depuis la perte de la ligne est < .......
                         .................. # deuxieme scrutation
-                    .................. # sinon
-                        .................. # donner la nouvelle valeur a "alarm" indiquant la perte de ligne definitive
+                    else : # sinon
+                        alarm = 2 # donner la nouvelle valeur a "alarm" indiquant la perte de ligne definitive
 
 
 # si le capteur de droite est sur le blanc ( appel a la fonction "line_detected(line_finder_right)" )
@@ -370,9 +370,9 @@ def start_mode_auto(choix):
 # ajustement de la variable "motor_angle" (s'ecarte de 10 degres par rapport a la variable "head_angle" )
 # pour que le robot se repositionne mieux sur la ligne (car il est un peut trop a droite de la ligne)
 
-            ..................
-                .................. # la variable "alarm" reste a 0 car il n'y a pas de perte de ligne noire
-                motor_angle = ..................
+            if line_detected(line_finder_left) == 1 and line_detected(line_finder_right) == 0 :
+                alarm = 0 # la variable "alarm" reste a 0 car il n'y a pas de perte de ligne noire
+                motor_angle = head_angle -10
 
 
 # si le capteur de gauche est sur le blanc
@@ -380,18 +380,18 @@ def start_mode_auto(choix):
 # ajustement la variable "motor_angle"
 # pour que le robot se repositionne mieux sur la ligne
 
-            ..................
-                ..................
-                ..................
+            if line_detected(line_finder_left) == 0 and line_detected(line_finder_right) == 1 :
+                alarm=0
+                motor_angle=head_angle + 10
 
 
 # si le capteur de gauche et si le capteur de droite sont sur la ligne noire
-# ajustement la variable "motor_angle" = ................
-# car le robot est ................... par rapport a la ligne noire
+# ajustement la variable "motor_angle" = "head_angle"
+# car le robot est bien positionné par rapport a la ligne noire
 
-            ..................
-                ..................
-                ..................
+            if line_detected(line_finder_left) == 1 and line_detected(line_finder_right) == 1 :
+                alarm=0
+                motor_angle=head_angle
 
 
 ################
@@ -405,16 +405,16 @@ def start_mode_auto(choix):
 
 # si alarm = 2 (la ligne est completement perdue), le robot s'arrete pendant 1s et affichage du message "lost"
 
-            ..................
-                ..................
+            if alarm==0:
+                linear_motion(1,45,motor_angle)
                    ..................
+                if alarm==1:
+                   linear_motion(1,15,motor_angle)
                 ..................
-                   ..................
-                ..................
-            ..................
-                ..................
-                ..................
-                ..................
+            if alarm=2:
+                stop_motion()
+                time.sleep(1)
+                print"lost"
 
 
 
@@ -442,10 +442,10 @@ def start_mode_auto(choix):
                         lock1 == 1 # realisation du verrouillage pour ne plus prendre en compte le tag deja detecte
                         alarm == 0 # la variable "alarm" reste a 0
                         stop_motion() # arret du robot
-                        head_angle = 0 # la variable "head_angle" prend la valeur ......
+                        head_angle = 0 # la variable "head_angle" prend la valeur 0
                         turn_head(servo_head, head_angle) # saut a fonction turn_head(servo_head,head_angle) pour tourner tete
                         time.sleep(2) # attente de 2s
-                        linear_motion(1, 45, head_angle) # redemarrage avec la fonction "linear_motion"
+                        linear_motion("1", vitesse, head_angle) # redemarrage avec la fonction "linear_motion"
                         time.sleep(1) # pendant 1s
                         stop_motion() # arret du robot
 
@@ -457,8 +457,8 @@ def start_mode_auto(choix):
 
                 if tag == rfid2:
                     if lock2 == 0:
-                        lock2 == 1
-                        alarm == 0
+                        lock2 = 1
+                        alarm = 0
                         stop_motion()
                         if choix == 1:
                             head_angle = -90 # la variable head_angle prend la valeur 90° pour aller a droite
@@ -466,7 +466,7 @@ def start_mode_auto(choix):
                             head_angle = 120 # la variable head_angle prend la valeur 60° pour aller à gauche
                         turn_head(servo_head, head_angle)
                         time.sleep(2) # Attente de 2s
-                        linear_motion(1, 45, head_angle) # redemarre avec linear_motion()
+                        linear_motion("1", vitesse, head_angle) # redemarre avec linear_motion()
                         time.sleep(1) # Attente de 1s
 
 
@@ -476,12 +476,12 @@ def start_mode_auto(choix):
 
                 if tag == rfid3:
                     if lock3 ==0:
-                        lock3 == 1
+                        lock3 = 1
                         alarm = 0
                         stop_motion() # Arret du robot devant le depot
+                        time.sleep(2)
                         delivery(servo_delivery)
-                        time.sleep(1)
-                        linear_motion(1, 45, head_angle)
+                        linear_motion("1", vitesse, head_angle)
                         time.sleep(1) # Attente 1s
 
 
@@ -490,13 +490,13 @@ def start_mode_auto(choix):
 
                 if tag == rfid4:
                     if lock4 == 0:
-                        lock4 == 1
-                        alarm == 0
+                        lock4 = 1
+                        alarm = 0
                         stop_motion()
                         head_angle = 180
                         turn_head(servo_head, head_angle)
                         time.sleep(2) # Attente de 2s
-                        linear_motion(1, 45, head_angle) # le robot redemarre avec head_angle pour linear_motion
+                        linear_motion("1", vitesse, head_angle) # le robot redemarre avec head_angle pour linear_motion
                         time.sleep(1) # Attente de 1s pour linear_motion
 
 
@@ -511,7 +511,7 @@ def start_mode_auto(choix):
                         head_angle = 90
                         turn_head(servo_head, head_angle)
                         time.sleep(2) # Attente de 2s
-                        linear_motion(1, 45, head_angle) # A configurer avec vitesse, head_angle ...
+                        linear_motion("1", vitesse, head_angle) # A configurer avec vitesse, head_angle ...
                         time.sleep(1) # Attente de 1s pour linear_motion
 
 
@@ -525,9 +525,9 @@ def start_mode_auto(choix):
                         lock6 == 1
                         alarm == 0
                         stop_motion()
+                        time.sleep(2)
                         delivery(servo_delivery)
-                        time.sleep(1)
-                        linear_motion(1, 45, head_angle) # A configurer avec vitesse, head_angle ...
+                        linear_motion("1", vitesse, head_angle) # A configurer avec vitesse, head_angle ...
 
 
 # rfid7 permet de faire tourner la tete avec angle "head_angle" (droite oblique vers la droite du triangle equilateral)
@@ -541,7 +541,7 @@ def start_mode_auto(choix):
                         head_angle = -120
                         turn_head(servo_head, head_angle)
                         time.sleep(1)
-                        linear_motion(1, 45, head_angle) # A configurer avec vitesse, head_angle ...
+                        linear_motion("1", vitesse, head_angle) # A configurer avec vitesse, head_angle ...
                         time.sleep(1) # Attente de 1s pour faire avancer le robot pdt 1s
 
 
@@ -556,8 +556,8 @@ def start_mode_auto(choix):
                         stop_motion()
                         head_angle == 0
                         turn_head(servo_head, head_angle)
-                        time.sleep(1)
-                        linear_motion(1, 45, head_angle)
+                        time.sleep(2)
+                        linear_motion("1", vitesse, head_angle)
                         time.sleep(1)
                         stop_motion()
 

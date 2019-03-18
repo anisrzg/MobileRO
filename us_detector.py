@@ -24,9 +24,8 @@ def obstacle_detected(TRIG,ECHO,seuil):
     print("Distance:",distance,"cm") # affichage de la distance en cm
 
 
-    if distance<=seuil:  # si la valeur de la distance est <= a la valeur du seuil (initialise a 25 cm dans le main)
+    if distance <= seuil:  # si la valeur de la distance est <= a la valeur du seuil (initialise a 25 cm dans le main)
         print("STOP") # affichage du message stop
         return(1) # et retour au "Main" avec la valeur de retour "1" (car obstacle detecte)
     else: # sinon
         return(0) # retour au "Main" avec la valeur de retour "0" (car obstacle non detecte ou trop loin)
-
