@@ -51,8 +51,8 @@ class Motor(Thread):
 
 
 # Definition des 2 lignes du GPIO CW et CCW en E_S
-        GPIO.setup(self.my_pin_clockwise, GPIO.OUT)
-        GPIO.setup(self.my_pin_counterclockwise, GPIO.OUT)
+        GPIO.setup(self.pin_clockwise,GPIO.OUT)
+        GPIO.setup(self.pin_counterclockwise,GPIO.OUT)
 
 
         while self.exit != True:
@@ -62,7 +62,7 @@ class Motor(Thread):
 # Calcul des durees du niveau haut et du niveau bas du signal PWM
 # en fonction de la vitesse choisie et de la periode
 
-            high_state_time = self.PWM_PERIOD*float(abs(self.velocity)/100)
+            high_state_time = self.PWM_PERIOD*float(abs(self.velocity)/100.0)
             low_state_time = self.PWM_PERIOD-high_state_time
 
 
@@ -84,7 +84,7 @@ class Motor(Thread):
 
 
 # le but est de faire tourner le moteur dans l'autre sens
-# la patte CW realise le PWM et la patte CCW = 0
+# la patte CW realise le PWM et la patte CCW =0
 # debut et fin sont des variables dans lesquelles sont stockees
 # les instants de debut et de fin du niveau haut du signal PWM
 
@@ -107,7 +107,7 @@ class Motor(Thread):
                 fin = 0
                 GPIO.output(self.pin_clockwise, GPIO.LOW)
                 GPIO.output(self.pin_counterclockwise, GPIO.LOW)
-                time.sleep(PWM_PERIOD)
+                time.sleep(self.PWM_PERIOD)
 
 
 

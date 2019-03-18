@@ -7,13 +7,15 @@ def obstacle_detected(TRIG,ECHO,seuil):
     time.sleep(15.0/1000000.0) # pendant 15us
     GPIO.output(TRIG, GPIO.LOW) # le signal trigger repasse au NB
 
+    global obstacle = 0
     pulse_start = 0 # initialisation de la variable "pulse_start"
     pulse_end = 0 # initialisation de la variable "pulse_end"
 
-    while GPIO.input(ECHO) == 0:  # attendre que le signal ECHO passe au NH  
+    while GPIO.input(ECHO) == 1:  # attendre que le signal ECHO passe au NH  
         pulse_start = time.time() # "pulse_start" prend la valeur de l'instant ou le signal ECHO passe au NH
-    while  GPIO.input(ECHO) == 1: # attendre que le signal ECHO passe au NB
-            pulse_end = time.time() # "pulse_end" prend la valeur de l'instant ou le signal ECHO repasse au NB
+        while  GPIO.input(ECHO) == 1: # attendre que le signal ECHO passe au NB
+            
+    pulse_end = time.time() # "pulse_end" prend la valeur de l'instant ou le signal ECHO repasse au NB
     pulse_duration = pulse_end - pulse_start  # calcul de la duree de l'impulsion du signal ECHO
 
 
@@ -24,9 +26,9 @@ def obstacle_detected(TRIG,ECHO,seuil):
 
     if distance <= seuil: # si la valeur de la distance est <= a la valeur du seuil (initialise a 25 cm dans le main)
         print ("STOP")# affichage du message stop
-        return (1) # et retour au "Main" avec la valeur de retour "1" (car obstacle detecte)
+        obstacle = 1
+        return obstacle  # et retour au "Main" avec la valeur de retour "1" (car obstacle detecte)
     else : # sinon
-         return (0)# retour au "Main" avec la valeur de retour "0" (car obstacle non detecte ou trop loin)
-
+        obstacle = 0 # retour au "Main" avec la valeur de retour "0" (car obstacle non detecte ou trop loin)
+        return obstacle
     
-
