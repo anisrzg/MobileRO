@@ -439,8 +439,8 @@ def start_mode_auto(choix):
 
                 if tag==rfid1: # si la variable "tag" a pris la valeur du tag "rfid1"
                     if lock1 == 0: # si il n'y a pas de verrouillage (grace a la variable "lock1")
-                        lock1 == 1 # realisation du verrouillage pour ne plus prendre en compte le tag deja detecte
-                        alarm == 0 # la variable "alarm" reste a 0
+                        lock1 = 1 # realisation du verrouillage pour ne plus prendre en compte le tag deja detecte
+                        alarm = 0 # la variable "alarm" reste a 0
                         stop_motion() # arret du robot
                         head_angle = 0 # la variable "head_angle" prend la valeur 0
                         turn_head(servo_head, head_angle) # saut a fonction turn_head(servo_head,head_angle) pour tourner tete
@@ -505,8 +505,8 @@ def start_mode_auto(choix):
 
                 if tag == rfid5:
                     if lock5 == 0:
-                        lock5 == 1
-                        alarm == 0
+                        lock5 = 1
+                        alarm = 0
                         stop_motion()
                         head_angle = 90
                         turn_head(servo_head, head_angle)
@@ -522,8 +522,8 @@ def start_mode_auto(choix):
 
                 if tag == rfid6:
                     if lock6 == 0:
-                        lock6 == 1
-                        alarm == 0
+                        lock6 = 1
+                        alarm = 0
                         stop_motion()
                         time.sleep(2)
                         delivery(servo_delivery)
@@ -536,7 +536,7 @@ def start_mode_auto(choix):
                 if tag == rfid7:
                     if lock7 == 0:
                         lock7 = 1
-                        alarm == 0
+                        alarm = 0
                         stop_motion()
                         head_angle = -120
                         turn_head(servo_head, head_angle)
@@ -551,8 +551,8 @@ def start_mode_auto(choix):
 
                 if tag == rfid8:
                     if lock8 == 0:
-                        lock7 == 8
-                        alarm == 0
+                        lock7 = 8
+                        alarm = 0
                         stop_motion()
                         head_angle == 0
                         turn_head(servo_head, head_angle)
@@ -590,10 +590,10 @@ def start_mode_auto(choix):
 # Definition des fonctions correspondant aux differents mouvements realisables par le robot
 
 
-def rotate(..................):
-        ..................
-        ..................
-        ..................)
+def rotate(velocity):
+        motor_1.set_motor_velocity(-velocity)
+        motor_2.set_motor_velocity(-velocity)
+        motor_3.set_motor_velocity(-velocity)
 
 
 def go_straight(motor_ID, velocity):
@@ -604,40 +604,40 @@ def go_straight(motor_ID, velocity):
             motor_2.set_motor_velocity(velocity)
             motor_3.set_motor_velocity(-velocity)
 
-        ..................
-            ..................
-            ..................
-            ..................
+        if motor_ID == motor_2.motor_ID:
+            motor_1.set_motor_velocity(-velocity)
+            motor_2.set_motor_velocity(0)
+            motor_3.set_motor_velocity(velocity)
 
-        ..................
-            ..................
-            ..................
-            ..................
+        if motor_ID == motor_3.motor_ID:
+            motor_1.set_motor_velocity(velocity)
+            motor_2.set_motor_velocity(-velocity)
+            motor_3.set_motor_velocity(0)
 
 
-def linear_motion(..................):
+def linear_motion(motor_ID, velocity, angle):
     # le moteur dont l'ID est donnee en argument sera le moteur de proue du mouvement
 
         if motor_ID == motor_1.motor_ID:
-            ..................
-            ..................
-            ..................
+            motor_1.set_motor_velocity(-velocity*sin(radians(angle)))
+            motor_2.set_motor_velocity(velocity*sin(radians(angle+60)))
+            motor_3.set_motor_velocity(-velocity*sin(radians(60-angle)))
 
-        ..................
-            ..................
-            ..................
-            ..................
+        if motor_ID == motor_2.motor_ID:
+            motor_1.set_motor_velocity(-velocity*sin(radians(60-angle)))
+            motor_2.set_motor_velocity(-velocity*sin(radians(angle)))
+            motor_3.set_motor_velocity(velocity*sin(radians(angle+60)))
 
-        ..................
-            ..................
-            ..................
-            ..................
+        if motor_ID == motor_3.motor_ID:
+            motor_1.set_motor_velocity(velocity*sin(radians(angle+60)))
+            motor_2.set_motor_velocity(-velocity*sin(radians(60-angle)))
+            motor_3.set_motor_velocity(-velocity*sin(radians(angle)))
 
 
 def stop_motion():
-        ..................
-        ..................
-        ..................
+        motor_1.set_motor_velocity(0)
+        motor_2.set_motor_velocity(0)
+        motor_3.set_motor_velocity(0)
 
 
 
@@ -653,8 +653,8 @@ motor_3 = Motor("3",23,24)
 
 # Lancement des 3 threads : la fonction self.start() fait appel a la fonction self.run()
 motor_1.start()
-..................
-..................
+motor_2.start()
+motor_3.start()
 
 
 
@@ -678,14 +678,14 @@ try:
             motor_1.debug=1
         if action == "off1":
             motor_1.debug=0
-        ..................
-            ..................
-        ..................
-            ..................
-        ..................
-            ..................
-        ..................
-            ..................
+        if action == "on2":
+            motor_2.debug=1
+        if action == "off2":
+            motor_2.debug=0
+        if action == "on3":
+            motor_3.debug=1
+        if action == "off3":
+            motor_3.debug=0
 
 
 
@@ -694,20 +694,20 @@ try:
 
 
 # test de la fonction "stop_motion"
-        ..................
-            ..................
+        if action == "s":
+            stop_motion()
 
 
 # test des differentes fonctions "go_straight"
-        ..................
-            ..................
-            ..................
-        ..................
-            ..................
-            ..................
-        ..................
-            ..................
-            ..................
+        if action == "go1":
+            vitesse = int(input())
+            go_straight("1", vitesse)
+        if action == "go2":
+            vitesse = int(input())
+            go_straight("2", vitesse)
+        if action == "go3":
+            vitesse = int(input())
+            go_straight("3", vitesse)
 
 
 # test des differentes fonctions "linear_motion"
@@ -715,32 +715,30 @@ try:
             vitesse = int(input())
             angle = int(input())
             linear_motion("1", vitesse, angle)
-        ..................
-            ..................
-            ..................
-            ..................
-        ..................
-            ..................)
-            ..................
-            ..................
+        if action == "l2":
+            vitesse = int(input())
+            angle = int(input())
+            linear_motion("2", vitesse, angle)
+        if action == "l3":
+            vitesse = int(input())
+            angle = int(input())
+            linear_motion("3", vitesse, angle)
 
 
 # test de la fonction "rotate"
-        ..................
-            ..................
-            ..................
+        if action == "rot":
+            vitesse = int(input())
+            rotate(vitesse)
 
 
 
-# Les commandes clavier suivantes correspondent au mode automatique de fonctionnement reel
-
-
+# Les commandes clavier suivantes correspondent au mode automatique
 # lancement du mode automatique de fonctionnement reel
 # saisie du numero de l'atelier ou le materiel doit etre livre (1 ou 2) et mise dans la variable "choix"
 # appel a la fonction ""start_mode_auto" pour lancer le mode automatique
         if action == "auto":
-            choix = ..................
-            ..................
+            choix = int(input())
+            start_mode_auto(choix)
 
 
 # lancement de la calibration du magnetometre (a faire la 1ere fois avant de lancer le mode auto)
@@ -758,12 +756,12 @@ try:
 
 finally:
     motor_1.exit = True
-    ..................
-    ..................
+    motor_2.exit = True
+    motor_3.exit = True
 
 
     motor_1.join()
-    ..................
-    ..................
+    motor_2.join()
+    motor_3.join()
 
 #GPIO.cleanup()

@@ -51,8 +51,8 @@ class Motor(Thread):
 
 
 # Definition des 2 lignes du GPIO CW et CCW en E_S
-        .........................
-        .........................
+        GPIO.setup(self.my_pin_clockwise, GPIO.OUT)
+        GPIO.setup(self.my_pin_counterclockwise, GPIO.OUT)
 
 
         while self.exit != True:
@@ -62,8 +62,8 @@ class Motor(Thread):
 # Calcul des durees du niveau haut et du niveau bas du signal PWM
 # en fonction de la vitesse choisie et de la periode
 
-            high_state_time = .........................
-            low_state_time = .........................
+            high_state_time = self.PWM_PERIOD*float(abs(self.velocity)/100)
+            low_state_time = self.PWM_PERIOD-high_state_time
 
 
 
@@ -75,27 +75,27 @@ class Motor(Thread):
             if self.direction == 1:
                 GPIO.output(self.pin_clockwise, GPIO.LOW)
                 debut = time.time()
-                .........................
-                .........................
-                .........................
-                .........................
-                .........................
+                GPIO.output(self.pin_counterclockwise, GPIO.HIGH)
+                time.sleep(high_state_time)
+                fin = time.time()
+                GPIO.output(self.pin_counterclockwise, GPIO.LOW)
+                time.sleep(low_state_time)
 
 
 
 # le but est de faire tourner le moteur dans l'autre sens
-# la patte CW ......................... et la patte CCW .........................
+# la patte CW realise le PWM et la patte CCW = 0
 # debut et fin sont des variables dans lesquelles sont stockees
 # les instants de debut et de fin du niveau haut du signal PWM
 
             if self.direction == -1:
-                .........................
-                .........................
-                .........................
-                .........................
-                .........................
-                .........................
-                .........................
+                GPIO.output(self.pin_counterclockwise, GPIO.LOW)
+                debut = time.time()
+                GPIO.output(self.pin_clockwise, GPIO.HIGH)
+                time.sleep(high_state_time)
+                fin = time.time()
+                GPIO.output(self.pin_clockwise, GPIO.LOW)
+                time.sleep(low_state_time)
 
 
 
@@ -103,11 +103,11 @@ class Motor(Thread):
 # les variables debut et fin sont mises a 0
 
             if self.direction == 0:
-                .........................
-                .........................
-                .........................
-                .........................
-                .........................
+                debut = 0
+                fin = 0
+                GPIO.output(self.pin_clockwise, GPIO.LOW)
+                GPIO.output(self.pin_counterclockwise, GPIO.LOW)
+                time.sleep(PWM_PERIOD)
 
 
 
@@ -116,10 +116,7 @@ class Motor(Thread):
 # et ecriture sur de la duree s'ecoulant entre les instants debut et fin
 
             if self.debug == 1:
-                .........................
-                .........................
-                .........................
-                .........................
-
-
-
+                self.state_print()
+                print(high_state_time)
+                print(low_state_time)
+                print(fin-debut)
