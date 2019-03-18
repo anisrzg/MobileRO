@@ -356,11 +356,11 @@ def start_mode_auto(choix):
                     debut_alarm = time.time() # "debut_alarm" prend la valeur de l'instant ou ligne vient etre perdue
                     alarm = 1 # donner la nouvelle valeur a "alarm" indiquant la perte de ligne la 1ere fois
 
-                if debut_alarm < 1,5 : # si le temps ecoule depuis la perte de la ligne est < 1,5 s
-                    .................. # premiere scrutation
+                if time.time() - debut_alarm < 1,5 : # si le temps ecoule depuis la perte de la ligne est < 1,5 s
+                    motor_angle = head_angle + 90 # premiere scrutation
                 else : # sinon
-                    if debut_alarm < 4,5 :# si le temps ecoule depuis la perte de la ligne est < .......
-                        .................. # deuxieme scrutation
+                    if time.time() -  debut_alarm < 4,5 :# si le temps ecoule depuis la perte de la ligne est < .......
+                        motor_angle = head_angle - 180 # deuxieme scrutation
                     else : # sinon
                         alarm = 2 # donner la nouvelle valeur a "alarm" indiquant la perte de ligne definitive
 
@@ -372,7 +372,7 @@ def start_mode_auto(choix):
 
             if line_detected(line_finder_left) == 1 and line_detected(line_finder_right) == 0 :
                 alarm = 0 # la variable "alarm" reste a 0 car il n'y a pas de perte de ligne noire
-                motor_angle = head_angle -10
+                motor_angle = head_angle +10
 
 
 # si le capteur de gauche est sur le blanc
@@ -382,7 +382,7 @@ def start_mode_auto(choix):
 
             if line_detected(line_finder_left) == 0 and line_detected(line_finder_right) == 1 :
                 alarm=0
-                motor_angle=head_angle + 10
+                motor_angle=head_angle - 10
 
 
 # si le capteur de gauche et si le capteur de droite sont sur la ligne noire
@@ -405,16 +405,16 @@ def start_mode_auto(choix):
 
 # si alarm = 2 (la ligne est completement perdue), le robot s'arrete pendant 1s et affichage du message "lost"
 
-            if alarm==0:
-                linear_motion(1,45,motor_angle)
-                   ..................
-                if alarm==1:
-                   linear_motion(1,15,motor_angle)
-                ..................
             if alarm=2:
+                if alarm==1:
+                   vitesse=15
+                else:
+                   vitesse=45
+                linear_motion("1",vitesse,motor_angle)
+            else:
+                print("LOST")
                 stop_motion()
                 time.sleep(1)
-                print"lost"
 
 
 
