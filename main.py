@@ -344,78 +344,40 @@ def start_mode_auto(choix):
 
 # Suivi de la ligne noire
 
+        else:
+            if (line_detected(line_finder_right)==0 and line_detected(line_finder_left)==0):
+                if alarm == 0 :
+                    debut_alarme = time.time()
+                    alarm = 1
 
-        else : # sinon (cad si pas d'obstacle detecte)
-
-
-# si le capteur de gauche et si le capteur de droite sont sur le blanc
-# la variable "motor_angle" s'ecarte de la variable "head_angle" pour scruter la zone perpendiculairement
-# puis variable "motor_angle" s'ecarte de variable "head_angle" pour scruter zone perpendiculairement dans autre sens
-
-            if line_detected(line_finder_left) == 0 and line_detected(line_finder_right) == 0 :
-                if alarm == 0: # test de variable "alarm" pour savoir si juste avant la ligne noire n'etait pas perdue
-                    debut_alarm = time.time() # "debut_alarm" prend la valeur de l'instant ou ligne vient etre perdue
-                    alarm = 1 # donner la nouvelle valeur a "alarm" indiquant la perte de ligne la 1ere fois
-
-                if time.time() - debut_alarm < 1.5 : # si le temps ecoule depuis la perte de la ligne est < 1,5 s
-                    motor_angle = head_angle + 90 # premiere scrutation
-                else : # sinon
-                    if time.time() - debut_alarm < 4.5 : # si le temps ecoule depuis la perte de la ligne est < 4.5s
-                        motor_angle = head_angle - 90 # deuxieme scrutation
-                    else : # sinon
-                        alarm = 2 # donner la nouvelle valeur a "alarm" indiquant la perte de ligne definitive
-
-
-# si le capteur de droite est sur le blanc ( appel a la fonction "line_detected(line_finder_right)" )
-# et si le capteur de gauche est sur la ligne noire
-# ajustement de la variable "motor_angle" (s'ecarte de 10 degres par rapport a la variable "head_angle" )
-# pour que le robot se repositionne mieux sur la ligne (car il est un peut trop a droite de la ligne)
-
-            if line_detected(line_finder_left) == 1 and line_detected(line_finder_right) == 0 :
-                alarm = 0 # la variable "alarm" reste a 0 car il n'y a pas de perte de ligne noire
-                motor_angle = head_angle - 10
-
-
-# si le capteur de gauche est sur le blanc
-# et si le capteur de droite est sur la ligne noire
-# ajustement la variable "motor_angle"
-# pour que le robot se repositionne mieux sur la ligne
-
-            if line_detected(line_finder_right) == 1 and line_detected(line_finder_left) == 0 :
+                if (time.time()-debut_alarme)<1:
+                    motor_angle = head_angle+90
+                else:
+                    if(time.time()-debut_alarme)<3:
+                        motor_angle = head_angle-90
+                    else:
+                        alarm = 2
+            if (line_detected(line_finder_right)==0 and line_detected(line_finder_left)==1):
                 alarm = 0
-                motor_angle = head_angle + 10
-
-
-# si le capteur de gauche et si le capteur de droite sont sur la ligne noire
-# ajustement la variable "motor_angle" = "head_angle"
-# car le robot est parallele par rapport a la ligne noire
-
-            if line_detected(line_finder_left) == 1 and line_detected(line_finder_right) == 1 :
+                motor_angle = head_angle+10
+            if (line_detected(line_finder_right)==1 and line_detected(line_finder_left)==0):
+                alarm = 0
+                motor_angle = head_angle-10
+            if (line_detected(line_finder_right)==1 and line_detected(line_finder_left)==1):
                 alarm = 0
                 motor_angle = head_angle
 
-
-################
-
-
-# si alarm = 0 (la ligne n'est pas perdue), le robot avance avec la fonction "linear motion"
-# suivant sa roue de proue "1" a la "vitesse" = 45 et avec l'angle "motor_angle"
-
-# si alarm = 1(la ligne vient d'etre perdue),le robot avance avec la fonction "linear motion" (pour rechercher la ligne)
-# suivant sa roue de proue "1" a la "vitesse" = 15 (lentement) et avec l'angle "motor_angle"
-
-# si alarm = 2 (la ligne est completement perdue), le robot s'arrete pendant 1s et affichage du message "lost"
-
-            if alarm != 0:
+            if alarm!=2:
                 if alarm == 1:
-                    vitesse = 15
+                   vitesse = 15
                 else:
-                    vitesse = 45
+                   vitesse = 45
                 linear_motion("1", vitesse, motor_angle)
-            if alarm == 2:
-                print ("LOST")
+            else:
+                print("lost")
                 stop_motion()
                 time.sleep(1)
+
 
 
 
@@ -621,16 +583,16 @@ def linear_motion(motor_ID,velocity,angle):
 
         if motor_ID == motor_1.motor_ID:
             motor_1.set_motor_velocity(-velocity*sin(radians(angle)))
-            motor_2.set_motor_velocity(-velocity*sin(radians(angle+60)))
+            motor_2.set_motor_velocity(velocity*sin(radians(angle+60)))
             motor_3.set_motor_velocity(-velocity*sin(radians(60-angle)))
 
         if motor_ID == motor_2.motor_ID:
             motor_1.set_motor_velocity(-velocity*sin(radians(60-angle)))
             motor_2.set_motor_velocity(-velocity*sin(radians(angle)))
-            motor_3.set_motor_velocity(-velocity*sin(radians(angle+60)))
+            motor_3.set_motor_velocity(velocity*sin(radians(angle+60)))
 
         if motor_ID == motor_3.motor_ID:
-            motor_1.set_motor_velocity(-velocity*sin(radians(angle+60)))
+            motor_1.set_motor_velocity(velocity*sin(radians(angle+60)))
             motor_2.set_motor_velocity(-velocity*sin(radians(60-angle)))
             motor_3.set_motor_velocity(-velocity*sin(radians(angle)))
 
