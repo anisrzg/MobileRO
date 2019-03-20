@@ -357,10 +357,10 @@ def start_mode_auto(choix):
                     debut_alarm = time.time() # "debut_alarm" prend la valeur de l'instant ou ligne vient etre perdue
                     alarm = 1 # donner la nouvelle valeur a "alarm" indiquant la perte de ligne la 1ere fois
 
-                if time.time() - debut_alarm < 1.5 : # si le temps ecoule depuis la perte de la ligne est < 1,5 s
+                if time.time() - debut_alarm < 1 : # si le temps ecoule depuis la perte de la ligne est < 1,5 s
                     motor_angle = head_angle + 90 # premiere scrutation
                 else : # sinon
-                    if time.time() - debut_alarm < 4.5 : # si le temps ecoule depuis la perte de la ligne est < 4.5s
+                    if time.time() - debut_alarm < 3 : # si le temps ecoule depuis la perte de la ligne est < 4.5s
                         motor_angle = head_angle - 90 # deuxieme scrutation
                     else : # sinon
                         alarm = 2 # donner la nouvelle valeur a "alarm" indiquant la perte de ligne definitive
@@ -373,7 +373,7 @@ def start_mode_auto(choix):
 
             if line_detected(line_finder_left) == 1 and line_detected(line_finder_right) == 0 :
                 alarm = 0 # la variable "alarm" reste a 0 car il n'y a pas de perte de ligne noire
-                motor_angle = head_angle - 10
+                motor_angle = head_angle + 10
 
 
 # si le capteur de gauche est sur le blanc
@@ -383,7 +383,7 @@ def start_mode_auto(choix):
 
             if line_detected(line_finder_right) == 1 and line_detected(line_finder_left) == 0 :
                 alarm = 0
-                motor_angle = head_angle + 10
+                motor_angle = head_angle - 10
 
 
 # si le capteur de gauche et si le capteur de droite sont sur la ligne noire
@@ -621,16 +621,16 @@ def linear_motion(motor_ID,velocity,angle):
 
         if motor_ID == motor_1.motor_ID:
             motor_1.set_motor_velocity(-velocity*sin(radians(angle)))
-            motor_2.set_motor_velocity(-velocity*sin(radians(angle+60)))
+            motor_2.set_motor_velocity(velocity*sin(radians(angle+60)))
             motor_3.set_motor_velocity(-velocity*sin(radians(60-angle)))
 
         if motor_ID == motor_2.motor_ID:
             motor_1.set_motor_velocity(-velocity*sin(radians(60-angle)))
             motor_2.set_motor_velocity(-velocity*sin(radians(angle)))
-            motor_3.set_motor_velocity(-velocity*sin(radians(angle+60)))
+            motor_3.set_motor_velocity(velocity*sin(radians(angle+60)))
 
         if motor_ID == motor_3.motor_ID:
-            motor_1.set_motor_velocity(-velocity*sin(radians(angle+60)))
+            motor_1.set_motor_velocity(velocity*sin(radians(angle+60)))
             motor_2.set_motor_velocity(-velocity*sin(radians(60-angle)))
             motor_3.set_motor_velocity(-velocity*sin(radians(angle)))
 
