@@ -258,12 +258,12 @@ def start_mode_auto(choix):
 
 
 # setup angular sensor (magnetometre)
-    refresh= 1
-    rotation_speed = 7
+    refresh= 2
+    rotation_speed = 5
     patate = Angular() # "patate" est un objet de la classe "Angular"
     print("angle origine = ",patate.get_origin_angle()) #appel a "get_origin_angle" puis affichage de l angle d'origine
     start_clock_angular = time.time() # la variable "start_clock_angular" = l'heure ou l'angle d'origine a ete mesure
-    max_error=5
+    max_error=4
     print("angular_detector ---> READY") # ecriture pour montrer que l'angular detector est READY
     time.sleep(0.2) # petite attente de 0,2s
 
@@ -390,7 +390,9 @@ def start_mode_auto(choix):
             if len(tag)!=0: # si la chaine de caracteres n'est pas vide
                 stop_motion() # arret du robot
                 while tag not in list_rfid:
-                    time.sleep(0.1) # attente 0,1s
+                    linear_motion(1, -vitesse, head_angle) # le robot recule avec -vitesse
+                    time.sleep(0.7)
+                    linear_motion(1, vitesse, head_angle) # le robot avance avec vitesse et head_angle
                     tag=rfid(ser) #
 
 
@@ -522,6 +524,7 @@ def start_mode_auto(choix):
                         time.sleep(2)
                         linear_motion("1", vitesse, head_angle)
                         time.sleep(1)
+                        stop_motion()
 
 
 ####################################################################################################################
@@ -530,18 +533,23 @@ def start_mode_auto(choix):
 
 
             if time.time() - start_clock_angular > refresh :
-                stop_motion()
-                print("test")
-                #time.sleep(1)
                 error = patate.get_error()
+                print("ANGULAR ERROR = ", error)
+                #time.sleep(1)
                 if abs(error) >= max_error:
-                    rotate(int(signe(error)*rotation_speed))
+                    stop_motion()
+                    time.sleep(0.5)
+                    print("Angular Correction")
                     #rotate(6)
                     while abs(error) >= max_error :
+                        rotate(int(signe(error)*rotation_speed))
                         #print(error)
-                        time.sleep(0.5)
+                        time.sleep(0.6)
                         error = patate.get_error()
+                        print("ANGULAR ERROR = ", error)
                     stop_motion()
+                    time.sleep(0.5)
+                    alarm = 0
                     #time.sleep(1)
                 start_clock_angular = time.time()
 
@@ -628,7 +636,8 @@ motor_3.start()
 
 
 try:
-
+    print("################### ACTIONS ###################\nauto ---> Mode AUTO\n++++ Ateliers ++++\n     1 ---> cote carre\n     2 ---> cote triangle\nl(num roue) ---> Avancer selon le num. de roue et selon un angle\ngo(num roue) ---> Avancer tout droit dans la direction de la roue\nrot ---> Tourner selon une vitesse\ns ---> arreter le robot\n###############################################")
+    print("Mode ou action a realiser ? ")
     action = "" # initialisation de la variable "action" (chaine de caracteres vide)
 
     while action != "exit" : # tant que la commande clavier est differente de "exit"

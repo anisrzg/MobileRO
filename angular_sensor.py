@@ -32,22 +32,22 @@ class Angular():
         if vector[0] > 0 :
             angle = ((360.0/(2.0*pi))*asin(float(vector[1])/float(sqrt(vector[0]**2+vector[1]**2))))
         else:
-            if vector[1] > 0 : 
-                angle = 180-((360.0/(2.0*pi))*asin(float(vector[1])/float(sqrt(vector[0]**2+vector[1]**2))))  
+            if vector[1] > 0 :
+                angle = 180-((360.0/(2.0*pi))*asin(float(vector[1])/float(sqrt(vector[0]**2+vector[1]**2))))
             else:
                 angle = -180-((360.0/(2.0*pi))*asin(float(vector[1])/float(sqrt(vector[0]**2+vector[1]**2))))
-        print(angle)
+        print("ANGLE = ", angle)
         return(angle)
-    
+
     def get_error(self):
         return(self.origin_angle-self.get_angle())
 
     def get_origin_angle(self):
         return(self.origin_angle)
-    
+
     def get_raw_vector(self):
         return(self.magnet.getMagnetometerRaw())
-    
+
     def set_parameters(self):
         parameters=[]
         file = open("config.conf","r")

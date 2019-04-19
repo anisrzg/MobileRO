@@ -1,5 +1,3 @@
-
-
 import serial
 import time
 

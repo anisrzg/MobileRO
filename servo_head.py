@@ -16,5 +16,5 @@ import time
 
 
 def turn_head(servo,angle):
-    if angle <= 190.0 and angle > -190.0: # test pour savoir si "angle" est compris entre - 190 (exclus) et 190 (inclus) lancer le servo avec le duty cycle correspondant a la valeur de "angle"
-        servo.ChangeDutyCycle((((-float(angle)/270)*1.0+1.5)/20)*100)# cad l'"angle robot" que celui-ci fait 
+    if angle <= 190.0 and angle > -190.0: #test si "angle" est compris entre -190 (exclus) et 190 (inclus)
+        servo.ChangeDutyCycle((((-float(angle)/270)*1.0+1.5)/20)*100)# Lancer avec DutyCycle angle robot
